@@ -2,7 +2,7 @@ Hospital Patient Record Management System
 
 📌 Overview
 
-This project simulates a basic Hospital Patient Record Management System using core data structures in C++. t uses key data structures like linked lists, queues, stacks, and priority queues to manage patient records, emergency room queues, and treatment history. It's designed to show how these structures work in a real-world hospital scenario.
+This project simulates a basic Hospital Patient Record Management System using core data structures in C++. It uses key data structures like linked lists, queues, and stacks to manage patient records, emergency room queues, and treatment history. It's designed to show how these structures work in a real-world hospital scenario.
 
 🎯 Features
 
