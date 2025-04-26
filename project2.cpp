@@ -188,6 +188,38 @@ public:
         head = nullptr;
     }
 
+    // Function to check for duplicate ID
+    bool checkDuplicate(string key)
+    {
+        if (head == NULL)
+        {
+            return false;
+        }
+
+        PNode *temp = head;
+        bool found = false;
+
+        while (temp != NULL)
+        {
+            if (temp->data.getID() == key)
+            {
+                found = true;
+                break;
+            }
+            temp = temp->next;
+        }
+
+        if (found)
+        {
+            cout << "   Duplicate ID found! Can not register with this ID. " << endl;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     // insert at begining of the Patient records
     void addPatientRecord(PatientRecord newData)
     {
@@ -258,6 +290,36 @@ public:
             }
         }
     }
+
+    // Function to search for a patient by ID
+    void searchPatient(string key)
+    {
+        if (head == NULL)
+        {
+            cout << "The list is empty.\n";
+            return;
+        }
+
+        PNode *temp = head;
+        bool found = false;
+
+        while (temp != NULL)
+        {
+            if (temp->data.getID() == key)
+            {
+                temp->data.display();
+                found = true;
+                break;
+            }
+            temp = temp->next;
+        }
+
+        if (!found)
+        {
+            cout << "No patient found with ID: " << key << endl;
+        }
+    }
+
 
     // to edit any changes in patients record eg. last name changed OR incorrect DoB was entered
     void editPatientRecord(int choice, string key)
@@ -537,11 +599,12 @@ void displayMenu()
     cout << "2 - Edit a Patient Record" << endl;
     cout << "3 - Delete a Patient Record" << endl;
     cout << "4 - Display all Patient Records" << endl;
-    cout << "5 - Remove patient record from emergency room queue" << endl;
-    cout << "6 - View Emergency Queue" << endl;
-    cout << "7 - Treat a Patient (Push to Stack)" << endl;
-    cout << "8 - Undo Last Treatment (Pop from Stack)" << endl;
-    cout << "9 - View Treatment History (Display Stack)" << endl;
+    cout << "5 - Search Patient Record by ID" << endl;
+    cout << "6 - Remove patient record from emergency room queue" << endl;
+    cout << "7 - View Emergency Queue" << endl;
+    cout << "8 - Treat a Patient (Push to Stack)" << endl;
+    cout << "9 - Undo Last Treatment (Pop from Stack)" << endl;
+    cout << "10 - View Treatment History (Display Stack)" << endl;
     cout << "0 - Exit" << endl;
     cout << endl;
 }
@@ -575,20 +638,23 @@ int main()
 
             cout << "Patient ID: ";
             cin >> ID;
-            cout << "Patient First Name: ";
-            cin >> firstName;
-            cout << "Patient Last Name: ";
-            cin >> lastName;
-            cout << "Patient Gender: ";
-            cin >> gender;
-            cout << "Patient Date of Birth (dd mm yyyy): ";
-            cin >> day >> month >> year;
-
-            PatientRecord newPatient(ID, firstName, lastName, Date(day, month, year), gender, option);
-            Patients.addPatientRecord(newPatient);
-            if (option == 1)
+            if (Patients.checkDuplicate(ID) == false)
             {
-                emergencyQueue.enqueue(newPatient);
+                cout << "Patient First Name: ";
+                cin >> firstName;
+                cout << "Patient Last Name: ";
+                cin >> lastName;
+                cout << "Patient Gender: ";
+                cin >> gender;
+                cout << "Patient Date of Birth (dd mm yyyy): ";
+                cin >> day >> month >> year;
+
+                PatientRecord newPatient(ID, firstName, lastName, Date(day, month, year), gender, option);
+                Patients.addPatientRecord(newPatient);
+                if (option == 1)
+                {
+                    emergencyQueue.enqueue(newPatient);
+                }
             }
         }
         else if (choice == 2)
@@ -603,7 +669,6 @@ int main()
             cout << "   3 - Edit Last Name" << endl;
             cout << "   4 - Edit Date of Birth" << endl;
             cout << "   5 - Edit Gender" << endl;
-            cout << "   6 - Edit emergency status" << endl;
             cin >> option;
             Patients.editPatientRecord(option, PID);
         }
@@ -623,17 +688,26 @@ int main()
 
         else if (choice == 5)
         {
+
+            string PID;
+            cout << "Enter the Patient National ID you want to search: ";
+            cin >> PID;
+            Patients.searchPatient(PID);
+        }
+
+        else if (choice == 6)
+        {
             PatientRecord treatedPatient = emergencyQueue.dequeue();
             treatedPatient.setCondition(0);
         }
 
-        else if (choice == 6)
+        else if (choice == 7)
         {
             cout << "----- List of Emergency Patients -----" << endl;
             emergencyQueue.displayQueue();
         }
 
-        else if (choice == 7) // Push a patient to treatment stack
+        else if (choice == 8) // Push a patient to treatment stack
 
         {
             string PID;
@@ -660,13 +734,13 @@ int main()
             }
         }
 
-        else if (choice == 8) // Undo last treatment
+        else if (choice == 9) // Undo last treatment
         {
 
             treatmentStack.pop();
         }
 
-        else if (choice == 9) // Display treatment stack
+        else if (choice == 10) // Display treatment stack
         {
 
             treatmentStack.DisplayStack();
