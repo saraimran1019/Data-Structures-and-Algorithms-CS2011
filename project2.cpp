@@ -74,6 +74,7 @@ private:
     string lastName;
     Date DoB;
     string gender;
+    string treatment;
 
     // used to store if patient is an emergency case or not. If yes, record will be added in linked list and emergncy queue
     int condition;
@@ -125,6 +126,10 @@ public:
         this->condition = condition;
     }
 
+    void setTreatment(string treatment)
+    {
+        this->treatment = treatment;
+    }
     // Getters
     string getID()
     {
@@ -155,13 +160,18 @@ public:
         return this->condition;
     }
 
+    string getTreatment()
+    {
+        return this->treatment;
+    }
+
     // Display function
     void display()
     {
         cout << "ID: " << this->ID << ", Name: " << this->firstName << " " << this->lastName << ", Date of Birth: ";
         this->DoB.display();
         cout << ", Gender: " << this->gender;
-        cout << ", Condition: " << this->condition << endl;
+        cout << ", Condition: " << this->condition;
     }
 };
 
@@ -320,7 +330,6 @@ public:
         }
     }
 
-
     // to edit any changes in patients record eg. last name changed OR incorrect DoB was entered
     void editPatientRecord(int choice, string key)
     {
@@ -449,6 +458,7 @@ public:
             rear = nullptr;
 
         delete temp;
+        cout << "Patient dequed successfully";
         return removedPatient;
     }
 
@@ -465,10 +475,19 @@ public:
         while (current != nullptr)
         {
             current->data.display();
+            cout << endl;
             current = current->next;
         }
     }
 };
+
+const int INDEX = 5; // Sample size for the array
+string treatments[INDEX] = {
+    "General Checkup",
+    "X-Ray",
+    "Blood Test",
+    "Surgery",
+    "Vaccination"};
 
 class TreatmentStack
 {
@@ -517,6 +536,7 @@ public:
         while (current != nullptr)
         {
             current->data.display();
+            cout << ", Treatment: " << current->data.getTreatment() << endl;
             current = current->next;
         }
     }
@@ -600,11 +620,12 @@ void displayMenu()
     cout << "3 - Delete a Patient Record" << endl;
     cout << "4 - Display all Patient Records" << endl;
     cout << "5 - Search Patient Record by ID" << endl;
-    cout << "6 - Remove patient record from emergency room queue" << endl;
-    cout << "7 - View Emergency Queue" << endl;
-    cout << "8 - Treat a Patient (Push to Stack)" << endl;
-    cout << "9 - Undo Last Treatment (Pop from Stack)" << endl;
-    cout << "10 - View Treatment History (Display Stack)" << endl;
+    cout << "6 - Add patient record to emergency room queue" << endl;
+    cout << "7 - Remove patient record from emergency room queue" << endl;
+    cout << "8 - View Emergency Queue" << endl;
+    cout << "9 - Treat a Patient (Push to Stack)" << endl;
+    cout << "10 - Undo Last Treatment (Pop from Stack)" << endl;
+    cout << "11 - View Treatment History (Display Stack)" << endl;
     cout << "0 - Exit" << endl;
     cout << endl;
 }
@@ -612,6 +633,7 @@ void displayMenu()
 int main()
 {
     LinkedList Patients;
+
     cout << "--------Welcome to the Hospital Patient Management System--------" << endl;
     int choice;
     EmergencyQueue emergencyQueue;
@@ -690,25 +712,60 @@ int main()
         {
 
             string PID;
-            cout << "Enter the Patient National ID you want to search: ";
+            cout << "Enter the Patient ID you want to search: ";
             cin >> PID;
             Patients.searchPatient(PID);
         }
 
         else if (choice == 6)
         {
-            PatientRecord treatedPatient = emergencyQueue.dequeue();
-            treatedPatient.setCondition(0);
+            string PID;
+            cout << "Enter Patient ID to add to the emergency queue: ";
+            cin >> PID;
+
+            PNode *current = Patients.head;
+            bool found = false;
+
+            while (current != nullptr)
+            {
+                if (current->data.getID() == PID)
+                {
+                    current->data.setCondition(1);
+                    emergencyQueue.enqueue(current->data);
+                    found = true;
+                    break;
+                }
+                current = current->next;
+            }
+
+            if (!found)
+            {
+                cout << "Patient ID not found. Cannot push to treatment stack." << endl;
+            }
         }
 
         else if (choice == 7)
+        {
+            PatientRecord treatedPatient = emergencyQueue.dequeue();
+            PNode *current = Patients.head;
+            while (current != nullptr)
+            {
+                if (current->data.getID() == treatedPatient.getID())
+                {
+                    current->data.setCondition(0);
+                    break;
+                }
+                current = current->next;
+            }
+        }
+
+        else if (choice == 8)
         {
             cout << "----- List of Emergency Patients -----" << endl;
             emergencyQueue.displayQueue();
         }
 
-        else if (choice == 8) // Push a patient to treatment stack
-
+        else if (choice == 9) // Push a patient to treatment stack
         {
             string PID;
             cout << "Enter Patient ID to treat: ";
@@ -721,6 +778,24 @@ int main()
             {
                 if (current->data.getID() == PID)
                 {
+                    // Display treatment options
+                    cout << "Select a treatment procedure:" << endl;
+                    for (int i = 0; i < INDEX; ++i)
+                    {
+                        cout << i + 1 << " - " << treatments[i] << endl;
+                    }
+
+                    int treatmentChoice;
+                    cin >> treatmentChoice;
+
+                    if (treatmentChoice < 1 || treatmentChoice > INDEX)
+                    {
+                        cout << "Invalid treatment selection." << endl;
+                        break;
+                    }
+
+                    // Assign treatment
+                    current->data.setTreatment(treatments[treatmentChoice - 1]);
                     treatmentStack.push(current->data);
                     found = true;
                     break;
@@ -734,13 +809,13 @@ int main()
             }
         }
 
-        else if (choice == 9) // Undo last treatment
+        else if (choice == 10) // Undo last treatment
         {
 
             treatmentStack.pop();
         }
 
-        else if (choice == 10) // Display treatment stack
+        else if (choice == 11) // Display treatment stack
         {
 
             treatmentStack.DisplayStack();
